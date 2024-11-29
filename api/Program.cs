@@ -3,6 +3,7 @@ using api.Interfaces;
 using api.Models;
 using api.Repository;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,10 @@ builder.Services.AddControllers(); // Add Controllers
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddControllers().AddNewtonsoftJson(options => {
+    options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;  
+});
+
 // DB
 builder.Services.AddDbContext<ApplicationDBContext>(options => {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -19,6 +24,7 @@ builder.Services.AddDbContext<ApplicationDBContext>(options => {
 
 // IStockRepository, StockRepository
 builder.Services.AddScoped<IStockRepository, StockRepository>(); 
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 var app = builder.Build();
 

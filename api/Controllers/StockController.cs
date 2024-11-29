@@ -44,12 +44,12 @@ namespace api.Controllers
         }
 
         // url을 통해서가 아니라 http body에 있는 데이터를 전달하기 때문에 FromBody를 써줘야함
-        // CreatedAtAction(string actionName, object routeValues, object value);
+        // CreatedAtAction(string actionName, object routeValues, object return value); Http 201 상태코드 & 리소스의 위치 정보 반환
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto) 
         {
-            var stockModel = stockDto.ToStockFromCreateDTO();
-            await _stockRepo.CreateAsync(stockModel);
+            var stockModel = stockDto.ToStockFromCreateDTO(); // stockDto -> stock
+            await _stockRepo.CreateAsync(stockModel); // save the stock in the database
             return CreatedAtAction(nameof(GetById), new { id = stockModel.Id }, stockModel.Id);
         }
 
@@ -77,7 +77,7 @@ namespace api.Controllers
             {
                 return NotFound();
             }
-            
+
             return NoContent();
         }
     }
