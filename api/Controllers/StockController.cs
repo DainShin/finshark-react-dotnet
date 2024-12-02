@@ -1,5 +1,6 @@
 using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,7 @@ namespace api.Controllers
 
             // _context.Stocks : Returns objects
             // ToList(): In order to be able to create the sql to go out the database to get whatever you need
-            var stocks = await _stockRepo.GetAllAsync();
+            var stocks = await _stockRepo.GetAllAsync(query);
 
             var stockDto = stocks.Select(s => s.ToStockDto());   // 각 Stock 객체를 StockDto로 변환
 
