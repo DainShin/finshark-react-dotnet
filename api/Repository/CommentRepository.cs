@@ -58,6 +58,7 @@ namespace api.Repository
             {
                 return null;
             }
+            
             existingComment.Title = commentModel.Title;
             existingComment.Content = commentModel.Content;
 

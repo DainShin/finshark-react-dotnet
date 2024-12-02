@@ -19,8 +19,10 @@ namespace api.Repository
 
         public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
+            // AsQueryable: 데이터를 쿼리 가능한 형태로 가져옴
             var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
 
+            // 비어있거나 공백으로만 이뤄져있는지 확인
             if(!string.IsNullOrWhiteSpace(query.CompanyName))
             {
                 stocks = stocks.Where(s => s.CompanyName.Contains(query.CompanyName));
@@ -31,7 +33,21 @@ namespace api.Repository
                 stocks = stocks.Where(s => s.Symbol.Contains(query.Symbol));    
             }
 
-            return await stocks.ToListAsync();
+            if(!string.IsNullOrWhiteSpace(query.SortBy))
+            {
+                // SortBy값이 Symbol 인지 대소문자 구분없이 확인
+                if(query.SortBy.Equals("Symbol", StringComparison.OrdinalIgnoreCase))
+                {
+                    // true-> Symbol 기준으로 내림차순 정렬. false-> Symbol 기준으로 오름차순 정렬
+                    stocks = query.IsDescending ? stocks.OrderByDescending(s => s.Symbol) : stocks.OrderBy(s=>s.Symbol);
+                }
+            }
+
+            // 현재페이지 이전에 표시된 데이터의 총 페이지 수 계산 * 한페이지에 표시할 데이터의 갯수
+            var skipNumber = (query.PageNumber - 1) * query.PageSize;
+
+            // 앞의 x개 데이터 건너뜀
+            return await stocks.Skip(skipNumber).Take(query.PageSize).ToListAsync();
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
