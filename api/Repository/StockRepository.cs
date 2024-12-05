@@ -20,7 +20,7 @@ namespace api.Repository
         public async Task<List<Stock>> GetAllAsync(QueryObject query)
         {
             // AsQueryable: 데이터를 쿼리 가능한 형태로 가져옴
-            var stocks = _context.Stocks.Include(c => c.Comments).AsQueryable();
+            var stocks = _context.Stocks.Include(c => c.Comments).ThenInclude(a => a.AppUser).AsQueryable();
 
             // 비어있거나 공백으로만 이뤄져있는지 확인
             if(!string.IsNullOrWhiteSpace(query.CompanyName))

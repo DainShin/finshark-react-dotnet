@@ -32,7 +32,7 @@ namespace api.Controllers
             // ToList(): In order to be able to create the sql to go out the database to get whatever you need
             var stocks = await _stockRepo.GetAllAsync(query);
 
-            var stockDto = stocks.Select(s => s.ToStockDto());   // 각 Stock 객체를 StockDto로 변환
+            var stockDto = stocks.Select(s => s.ToStockDto()).ToList();   // 각 Stock 객체를 StockDto로 변환
 
             return Ok(stocks); // 변환된 StockDto 리스트를 클라이언트에 반환
         }
