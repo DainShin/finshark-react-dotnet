@@ -14,38 +14,55 @@ namespace api.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IStockRepository _stockRepo;
         private readonly IPortfolioRepository _portfolioRepo;
+        private readonly IFMPService _fMPService;
 
-       public PortfolioController(UserManager<AppUser> userManager,
-       IStockRepository stoRepo, IPortfolioRepository portfolioRepo)
-       {
-        _userManager = userManager;
-        _stockRepo = stoRepo;
-        _portfolioRepo = portfolioRepo;
-       }
+        public PortfolioController(UserManager<AppUser> userManager,
+                                     IStockRepository stoRepo,
+                                     IPortfolioRepository portfolioRepo,
+                                     IFMPService fMPService)
+        {
+            _userManager = userManager;
+            _stockRepo = stoRepo;
+            _portfolioRepo = portfolioRepo;
+            _fMPService = fMPService;
+        }
 
-       [HttpGet]
-       [Authorize]
-       public async Task<IActionResult> GetUserPortfolio()
-       {
-        var username = User.GetUsername();
-        var appUser = await _userManager.FindByNameAsync(username); 
-        var userPortfolio = await _portfolioRepo.GetUserPortfolio(appUser);
-        return Ok(userPortfolio);
-       }
+        [HttpGet]
+        [Authorize]
+        public async Task<IActionResult> GetUserPortfolio()
+        {
+            var username = User.GetUsername();
+            var appUser = await _userManager.FindByNameAsync(username);
+            var userPortfolio = await _portfolioRepo.GetUserPortfolio(appUser);
+            return Ok(userPortfolio);
+        }
 
-       [HttpPost]
-       [Authorize]
+        [HttpPost]
+        [Authorize]
         public async Task<IActionResult> AddPortfolio(string symbol)
         {
             var userName = User.GetUsername();
             var appUser = await _userManager.FindByNameAsync(userName);
             var stock = await _stockRepo.GetBySymbolAsync(symbol);
 
-            if(stock == null) return BadRequest("Stock not found");
+            if (stock == null)
+            {
+                stock = await _fMPService.FindStockBySymbolAsync(symbol);
+                if (stock == null)
+                {
+                    return BadRequest("Stock does not exists");
+                }
+                else
+                {
+                    await _stockRepo.CreateAsync(stock);
+                }
+            }
+
+            if (stock == null) return BadRequest("Stock not found");
 
             var userPortfolio = await _portfolioRepo.GetUserPortfolio(appUser);
 
-            if(userPortfolio.Any(e => e.Symbol.ToLower() == symbol.ToLower())) return BadRequest("Cannot add same stock to portfolio");
+            if (userPortfolio.Any(e => e.Symbol.ToLower() == symbol.ToLower())) return BadRequest("Cannot add same stock to portfolio");
 
             var portfolioModel = new Portfolio
             {
@@ -53,13 +70,13 @@ namespace api.Controllers
                 AppUserId = appUser.Id,
             };
 
-            await  _portfolioRepo.CreateAsync(portfolioModel);
+            await _portfolioRepo.CreateAsync(portfolioModel);
 
-            if(portfolioModel == null) 
+            if (portfolioModel == null)
             {
                 return StatusCode(500, "Could not create");
             }
-            else 
+            else
             {
                 return Created();
             }
@@ -77,16 +94,16 @@ namespace api.Controllers
 
             var filteredStock = userPortfolio.Where(s => s.Symbol.ToLower() == symbol.ToLower());
 
-            if(filteredStock.Count() == 1) 
+            if (filteredStock.Count() == 1)
             {
                 await _portfolioRepo.DeleteAsync(appUser, symbol);
             }
-            else 
+            else
             {
                 return BadRequest("Stock is not in your portfolio");
             }
 
             return Ok();
-        }  
+        }
     }
 }

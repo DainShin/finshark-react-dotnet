@@ -1,6 +1,7 @@
 using api.Dtos.Stock;
 using api.Models;
 
+
 /*
     Mapper
     - 컨트롤러나 서비스에서 직접 변환 로직을 작성하면 동일한 로직이 여러곳에 중복됨
@@ -41,6 +42,19 @@ namespace api.Mappers
                 LastDiv = stockDto.LastDiv,
                 Industry = stockDto.Industry,
                 MarketCap = stockDto.MarketCap,
+            };
+        }
+
+        public static Stock ToStockFromFMP(this FMPStock fMPStock)
+        {
+            return new Stock
+            {
+                Symbol = fMPStock.symbol,
+                CompanyName = fMPStock.companyName,
+                Purchase = (decimal)fMPStock.price,
+                LastDiv = (decimal)fMPStock.lastDiv,
+                Industry = fMPStock.industry,
+                MarketCap = fMPStock.mktCap,
             };
         }
     }
