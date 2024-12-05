@@ -69,8 +69,8 @@ builder.Services.AddIdentity<AppUser, IdentityRole>(options => {
 // Authentication
 builder.Services.AddAuthentication(options => {
     options.DefaultAuthenticateScheme = // 기본 인증 스키마 설정 ex. 사용자가 요청을 보낼때 인증 토큰 검증
-    options.DefaultChallengeScheme =  // Challenge가 발생했을때 사용할 기본 스키마 설정
-    options.DefaultForbidScheme = // 권한부족 상태일때 사용할 기본 스키마 설정
+    options.DefaultChallengeScheme =  // 인증 실패시 
+    options.DefaultForbidScheme = // 인증은 되었지만 권한부족 상태일때 사용할 기본 스키마 설정
     options.DefaultScheme = // 모든 요청에서 사용할 기본 인증 스키마 설정
     options.DefaultSignInScheme =
     options.DefaultSignOutScheme = JwtBearerDefaults.AuthenticationScheme;  // 위의 기본 스키마들에 JWT Bearer 인증 사용하도록 지정
@@ -92,6 +92,7 @@ builder.Services.AddAuthentication(options => {
 builder.Services.AddScoped<IStockRepository, StockRepository>(); 
 builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 builder.Services.AddScoped<ITokenService,TokenService>();
+builder.Services.AddScoped<IPortfolioRepository,PortfolioRepository>();
 
 var app = builder.Build();
 
