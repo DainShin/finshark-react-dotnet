@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using api.Dtos.Account;
 using api.Interfaces;
 using api.Models;
@@ -45,6 +41,7 @@ namespace api.Controllers
                 if(createdUser.Succeeded)
                 {
                     var roleResult = await _userManager.AddToRoleAsync(appUser, "User");
+                    
                     if(roleResult.Succeeded)
                     {
                         return Ok(

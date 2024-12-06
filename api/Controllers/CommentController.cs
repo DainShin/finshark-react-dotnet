@@ -1,8 +1,10 @@
 using api.Dtos.Comment;
 using api.Extensions;
+using api.Helpers;
 using api.Interfaces;
 using api.Mappers;
 using api.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,11 +19,10 @@ namespace api.Controllers
         private readonly UserManager<AppUser> _userManager;
         private readonly IFMPService _fMPService;
         public CommentController(IStockRepository stockRepo, 
-                                ICommentRepository commentRepo, 
-                                UserManager<AppUser> userManager,
-                                IFMPService fMPService)
+                                    ICommentRepository commentRepo, 
+                                    UserManager<AppUser> userManager,
+                                    IFMPService fMPService)
         {
-
             _commentRepo = commentRepo;
             _stockRepo = stockRepo;
             _userManager = userManager;
@@ -29,13 +30,14 @@ namespace api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        [Authorize]
+        public async Task<IActionResult> GetAll([FromQuery]CommentQueryObject queryObject)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
 
-            var comments = await _commentRepo.GetAllAsync();
+            var comments = await _commentRepo.GetAllAsync(queryObject);
             var commentDto = comments.Select(c => c.ToCommentDto());
             return Ok(commentDto);
         }
@@ -78,6 +80,9 @@ namespace api.Controllers
                 }
             }
 
+            // User: .Net core 컨트롤러에서 제공하는 ClaimPrinciapal 객체. 현재 인증된 사용자 정보 포함함
+            // User.GetUsername(): ClaimsExtensions 에 정의된 확장 메서드 호출
+            // 현재 사용자 클레임에서 givenname 클레임의 값을 가져옴
             var username = User.GetUsername();
             var appUser = await _userManager.FindByNameAsync(username); 
 

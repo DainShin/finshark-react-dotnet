@@ -46,7 +46,7 @@ builder.Services.AddSwaggerGen(option =>
     });
 });
 
-
+// Json
 builder.Services.AddControllers().AddNewtonsoftJson(options => {
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;  
 });
@@ -106,6 +106,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection(); // 클라이언트가 http로 요청을 보낼경우 https url로 변환하여 안전하게 사용하도록 강제함
+
+app.UseCors(x => x
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                //.withOrigins("https://localhost:44351")
+                .SetIsOriginAllowed(origin => true));
 
 // Authentication, Authorization
 app.UseAuthentication();

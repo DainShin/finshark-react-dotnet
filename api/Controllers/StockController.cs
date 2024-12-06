@@ -5,7 +5,6 @@ using api.Interfaces;
 using api.Mappers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace api.Controllers
 {
@@ -25,8 +24,7 @@ namespace api.Controllers
         [Authorize]
         public async Task<IActionResult> GetAll([FromQuery] QueryObject query)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             // _context.Stocks : Returns objects
             // ToList(): In order to be able to create the sql to go out the database to get whatever you need
@@ -34,21 +32,18 @@ namespace api.Controllers
 
             var stockDto = stocks.Select(s => s.ToStockDto()).ToList();   // 각 Stock 객체를 StockDto로 변환
 
-            return Ok(stocks); // 변환된 StockDto 리스트를 클라이언트에 반환
+            return Ok(stockDto); // 변환된 StockDto 리스트를 클라이언트에 반환
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var stock = await _stockRepo.GetByIdAsync(id);
 
-            if (stock == null)
-            {
-                return NotFound();
-            }
+            if (stock == null) return NotFound();
+            
             return Ok(stock.ToStockDto());
         }
 
@@ -57,8 +52,7 @@ namespace api.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockRequestDto stockDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var stockModel = stockDto.ToStockFromCreateDTO(); // stockDto -> stock
             await _stockRepo.CreateAsync(stockModel); // save the stock in the database
@@ -69,16 +63,12 @@ namespace api.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDto updateDto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var stockModel = await _stockRepo.UpdateAsync(id, updateDto);
 
-            if (stockModel == null)
-            {
-                return NotFound();
-            }
-
+            if (stockModel == null) return NotFound();
+            
             return Ok(stockModel.ToStockDto());
         }
 
@@ -86,15 +76,11 @@ namespace api.Controllers
         [Route("{id:int}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
             var stockModel = await _stockRepo.DeleteAsync(id);
 
-            if (stockModel == null)
-            {
-                return NotFound();
-            }
+            if (stockModel == null) return NotFound();
 
             return NoContent();
         }
